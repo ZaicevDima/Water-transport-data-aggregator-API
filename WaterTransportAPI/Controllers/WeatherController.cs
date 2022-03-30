@@ -18,7 +18,7 @@ namespace WaterTransportAPI.Controllers
         }
 
         [HttpGet(Name = "GetWeather")]
-        public Weather Get(double lat, double lon) 
-            => weatherService.GetWeatherConditions(lat, lon);
+        public async Task<String> Get(double lat, double lon) 
+            => await weatherService.GetWeatherConditionsAsync(lat, lon);
     }
 }
