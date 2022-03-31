@@ -1,26 +1,82 @@
-﻿using WaterTransportAPI.Models;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace WaterTransportAPI.Services
 {
     public class WeatherService
     {
-        public async Task<String> GetWeatherConditionsAsync(double lat, double lon)
+        private ApiConfigs? configs; 
+
+        public WeatherService()
         {
-            var weatherConditions = new Weather();
+            var jsonConfig = File.ReadAllText("./Config/config.json");
+            configs = JsonConvert.DeserializeObject<ApiConfigs>(jsonConfig);
+        }
 
-            String resultJSON = "";
+        public async Task<Dictionary<string, string>> GetWeatherConditionsAsync(double lat, double lon)
+        {
+            var weatherConditions = GetWeatherCondDict();
 
-            var url = "https://api.weather.yandex.ru/v2/informers?lat=" + lat.ToString() +"&lon=" + lon.ToString();
-            Console.WriteLine(url);
-            using var client = new HttpClient();
+            if (configs == null)
+            {
+                return weatherConditions;
+            }
 
-            var msg = new HttpRequestMessage(HttpMethod.Get, url);
-            msg.Headers.Add("X-Yandex-API-Key", "2fc0daec-8f35-471a-b83f-a22d956e1697");
-            var res = await client.SendAsync(msg);
-            var content = await res.Content.ReadAsStringAsync();
+            foreach (var config in configs.ListConfigs)
+            {
+                var url = config.Url + 
+                    "lat=" + lat.ToString("0.00000", CultureInfo.InvariantCulture) + 
+                    "&lon=" + lon.ToString("0.00000", CultureInfo.InvariantCulture);
+                using var client = new HttpClient();
 
+                var msg = new HttpRequestMessage(HttpMethod.Get, url);
+                msg.Headers.Add(config.KeyName, config.KeyValue);
 
-            return content;
+                var res = await client.SendAsync(msg);
+                var content = await res.Content.ReadAsStringAsync();
+
+                weatherConditions = ParseCharacteristics(weatherConditions, config.Schema, content);
+            }
+
+            return weatherConditions;
+        }
+
+        private Dictionary<string, string> GetWeatherCondDict()
+        {
+            var weatherCond = new Dictionary<string, string>();
+            var chars = configs?.Chars.Split(',').ToList();
+
+            foreach (var charact in chars)
+            {
+                weatherCond.Add(charact, "");
+            }
+
+            return weatherCond;
+        }
+
+        private Dictionary<string, string> ParseCharacteristics(Dictionary<string, string> weatherConditions, 
+            List<ApiConfigs.Config.Characteristic> schema,
+            string content)
+        {
+            var data = JObject.Parse(content);
+
+            foreach (var characteristic in schema)
+            {
+                Console.WriteLine(characteristic.SystemChar + " " + characteristic.TpChar);
+
+                var path = characteristic.TpChar.Split('/').ToList();
+                var tag = data[path[0]];
+                for (var i = 1; i < path.Count; i++)
+                {
+                    tag = tag[path[i]];
+                }
+
+                weatherConditions[characteristic.SystemChar] = (string)tag;
+
+            }
+
+            return weatherConditions;
         }
     }
 }

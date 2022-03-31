@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using WaterTransportAPI.Models;
 using WaterTransportAPI.Services;
 
 namespace WaterTransportAPI.Controllers
@@ -18,7 +17,7 @@ namespace WaterTransportAPI.Controllers
         }
 
         [HttpGet(Name = "GetWeather")]
-        public async Task<String> Get(double lat, double lon) 
+        public async Task<Dictionary<string, string>> Get(double lat, double lon) 
             => await weatherService.GetWeatherConditionsAsync(lat, lon);
     }
 }
