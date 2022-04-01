@@ -2,7 +2,7 @@
 
 namespace WaterTransportAPI
 {
-    public class ApiConfigs
+    public class WeatherConfigs
     {
         public class Config
         {

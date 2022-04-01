@@ -1,17 +1,18 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Globalization;
 
 namespace WaterTransportAPI.Services
 {
     public class WeatherService
     {
-        private ApiConfigs? configs; 
+        private WeatherConfigs? configs; 
 
         public WeatherService()
         {
-            var jsonConfig = File.ReadAllText("./Config/config.json");
-            configs = JsonConvert.DeserializeObject<ApiConfigs>(jsonConfig);
+            var configFileText = File.ReadAllText("./Config/config.json");
+            var configFileJson = JObject.Parse(configFileText)?["Weather"];
+
+            configs = configFileJson?.ToObject<WeatherConfigs>();
         }
 
         public async Task<Dictionary<string, string>> GetWeatherConditionsAsync(double lat, double lon)
@@ -36,7 +37,7 @@ namespace WaterTransportAPI.Services
                 var res = await client.SendAsync(msg);
                 var content = await res.Content.ReadAsStringAsync();
 
-                weatherConditions = ParseCharacteristics(weatherConditions, config.Schema, content);
+                ParseCharacteristics(weatherConditions, config.Schema, content);
             }
 
             return weatherConditions;
@@ -47,6 +48,11 @@ namespace WaterTransportAPI.Services
             var weatherCond = new Dictionary<string, string>();
             var chars = configs?.Chars.Split(',').ToList();
 
+            if (chars == null)
+            {
+                return weatherCond;
+            }
+
             foreach (var charact in chars)
             {
                 weatherCond.Add(charact, "");
@@ -55,28 +61,34 @@ namespace WaterTransportAPI.Services
             return weatherCond;
         }
 
-        private Dictionary<string, string> ParseCharacteristics(Dictionary<string, string> weatherConditions, 
-            List<ApiConfigs.Config.Characteristic> schema,
+        private void ParseCharacteristics(Dictionary<string, string> weatherConditions, 
+            List<WeatherConfigs.Config.Characteristic> schema,
             string content)
         {
-            var data = JObject.Parse(content);
+            var contentJson = JObject.Parse(content);
 
             foreach (var characteristic in schema)
             {
-                Console.WriteLine(characteristic.SystemChar + " " + characteristic.TpChar);
-
                 var path = characteristic.TpChar.Split('/').ToList();
-                var tag = data[path[0]];
+                var tag = contentJson[path[0]];
+
                 for (var i = 1; i < path.Count; i++)
                 {
+                    if (tag == null)
+                    {
+                        break;
+                    }
+
                     tag = tag[path[i]];
                 }
 
-                weatherConditions[characteristic.SystemChar] = (string)tag;
-
+                if (tag != null)
+                {
+                    weatherConditions[characteristic.SystemChar] = tag.ToString();
+                }
             }
 
-            return weatherConditions;
+            return;
         }
     }
 }
