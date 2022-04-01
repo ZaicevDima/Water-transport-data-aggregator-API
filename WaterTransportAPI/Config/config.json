@@ -1,0 +1,39 @@
+﻿{
+  "Weather": 
+  {
+    "Chars": "TemperatureC,Humidity,PressureHg,Condition,Sunrise,Sunset,Hightide,Lowtide",
+    "DataSources": [
+      {
+        "Url": "https://api.weather.yandex.ru/v2/informers?",
+        "KeyName": "X-Yandex-API-Key",
+        "KeyValue": "2fc0daec-8f35-471a-b83f-a22d956e1697",
+        "Schema": [
+          {
+            "Sys": "TemperatureC",
+            "Tp": "fact/temp"
+          },
+          {
+            "Sys": "Humidity",
+            "Tp": "fact/humidity"
+          },
+          {
+            "Sys": "PressureHg",
+            "Tp": "fact/pressure_mm"
+          },
+          {
+            "Sys": "Condition",
+            "Tp": "fact/condition"
+          },
+          {
+            "Sys": "Sunrise",
+            "Tp": "forecast/sunrise"
+          },
+          {
+            "Sys": "Sunset",
+            "Tp": "forecast/sunset"
+          }
+        ]
+      }
+    ]
+  }
+}
