@@ -17,7 +17,7 @@ namespace WaterTransportAPI.Services
             //configs = configFileJson?.ToObject<WeatherConfigs>();
         }
 
-        public async Task<Dictionary<string, string>> GetNewsAsync(string searchQuery)
+        public async Task<string> GetNewsAsync(string searchQuery)
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -37,14 +37,18 @@ namespace WaterTransportAPI.Services
               key={2}";
             //Готовый текст запроса.
             string completeUrl = String.Format(url, searchQuery, user, key);
-            //Объект, отсылающий запрос.
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(completeUrl);
-            //Получение ответа.
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
 
-            Console.Write(response.ToString());
-            return new Dictionary<string, string>();
+            var request = (HttpWebRequest)WebRequest.Create(completeUrl);
+            var response = (HttpWebResponse)(await request.GetResponseAsync());
+
+            var responseText = "";
+            using (var reader = new StreamReader(response.GetResponseStream()))
+            {
+                responseText = reader.ReadToEnd();
+            }
+
+            return responseText;
         }
 
     }
