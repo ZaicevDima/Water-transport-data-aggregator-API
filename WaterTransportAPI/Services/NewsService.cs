@@ -23,19 +23,12 @@ namespace WaterTransportAPI.Services
 
             /* Адрес для совершения запроса, полученный при регистрации IP,
             в него уже забит логин и ключ API.*/
-            string user = "X-Yandex-API-Key";
-            string key = "2fc0daec-8f35-471a-b83f-a22d956e1697";
+            string user = "tigr53310";
+            string key = "03.377715118:f7e295478d08c739b21c3bdefd812c55";
 
             // Текст запроса в формате XML
-            string url = @"http://xmlsearch.yandex.ru/xmlsearch?
-              query={0}&
-              groupby=attr%3Dd.
-              mode%3Ddeep.
-              groups-on-page%3D10.
-              docs-in-group%3D1&
-              user={1}&
-              key={2}";
-            //Готовый текст запроса.
+            string url = $@"https://yandex.ru/search/xml?user={user}&key={key}&query={searchQuery}&l10n=ru&sortby=tm.order%3Dascending&filter=strict&groupby=attr%3D%22%22.mode%3Dflat.groups-on-page%3D10.docs-in-group%3D1&page=2";
+
             string completeUrl = String.Format(url, searchQuery, user, key);
 
 
@@ -47,6 +40,8 @@ namespace WaterTransportAPI.Services
             {
                 responseText = reader.ReadToEnd();
             }
+
+            Console.WriteLine(responseText);
 
             return responseText;
         }
