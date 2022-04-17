@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WaterTransportAPI.Models;
 using WaterTransportAPI.Services;
 
 namespace WaterTransportAPI.Controllers
@@ -17,7 +18,7 @@ namespace WaterTransportAPI.Controllers
         }
 
         [HttpGet(Name = "GetNews")]
-        public async Task<string> Get(string request)
+        public async Task<List<NewsResponse>> Get(string request)
             => await newsService.GetNewsAsync(request);
 
 

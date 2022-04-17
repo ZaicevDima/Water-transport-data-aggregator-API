@@ -2,6 +2,10 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
+using WaterTransportAPI.Models;
+using NewsAPI;
+using NewsAPI.Models;
+using NewsAPI.Constants;
 
 namespace WaterTransportAPI.Services
 {
@@ -17,34 +21,38 @@ namespace WaterTransportAPI.Services
             //configs = configFileJson?.ToObject<WeatherConfigs>();
         }
 
-        public async Task<string> GetNewsAsync(string searchQuery)
+        public async Task<List<NewsResponse>> GetNewsAsync(string searchQuery)
         {
-            ServicePointManager.Expect100Continue = false;
+            searchQuery = "\"" + searchQuery.Replace(",", "\" AND \"") + "\"";
 
-            /* Адрес для совершения запроса, полученный при регистрации IP,
-            в него уже забит логин и ключ API.*/
-            string user = "tigr53310";
-            string key = "03.377715118:f7e295478d08c739b21c3bdefd812c55";
+            var result = new List<NewsResponse>();
 
-            // Текст запроса в формате XML
-            string url = $@"https://yandex.ru/search/xml?user={user}&key={key}&query={searchQuery}&l10n=ru&sortby=tm.order%3Dascending&filter=strict&groupby=attr%3D%22%22.mode%3Dflat.groups-on-page%3D10.docs-in-group%3D1&page=2";
-
-            string completeUrl = String.Format(url, searchQuery, user, key);
-
-
-            var request = (HttpWebRequest)WebRequest.Create(completeUrl);
-            var response = (HttpWebResponse)(await request.GetResponseAsync());
-
-            var responseText = "";
-            using (var reader = new StreamReader(response.GetResponseStream()))
+            var newsApiClient = new NewsApiClient("");
+            var articlesResponse = newsApiClient.GetEverything(new EverythingRequest
             {
-                responseText = reader.ReadToEnd();
+                Q = searchQuery,
+                SortBy = SortBys.Popularity,
+                Language = Languages.RU,
+                From = new DateTime(2022, 03, 18)
+            });
+            if (articlesResponse.Status == Statuses.Ok)
+            {
+
+                // here's the first 20
+                foreach (var article in articlesResponse.Articles)
+                {
+                    var newsResponse = new NewsResponse();
+
+                    newsResponse.Url = article.Url;
+                    newsResponse.Author = article.Author;
+                    newsResponse.Title = article.Title;
+                    newsResponse.Description = article.Description;
+
+                    result.Add(newsResponse);
+                }
             }
 
-            Console.WriteLine(responseText);
-
-            return responseText;
+            return result;
         }
-
     }
 }
