@@ -17,7 +17,7 @@ namespace WaterTransportAPI.Models
 
             var content = await client.GetStringAsync(url);
 
-            Console.WriteLine(content);
+            //Console.WriteLine(content);
             return content.ToString();
         }
 
@@ -32,7 +32,8 @@ namespace WaterTransportAPI.Models
 
             foreach (var link in links)
             {
-                Console.WriteLine(link.ToString());
+                string htmlLink = link.ToHtml();
+                //string url = h
                 result.Add(link.ToHtml());
             }
             return result;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RegulatoryDocuments.Services;
+using WaterTransportAPI.Models;
 
 namespace WaterTransportAPI.Controllers
 {
@@ -17,7 +18,7 @@ namespace WaterTransportAPI.Controllers
         }
 
         [HttpGet(Name = "GetRegulatoryDocuments")]
-        public List<string> Get()
-            => regulatoryDocumentsService.GetRegulatoryDocumentsAsync();
+        public DocResult Get()
+            => regulatoryDocumentsService.parse();
     }
 }

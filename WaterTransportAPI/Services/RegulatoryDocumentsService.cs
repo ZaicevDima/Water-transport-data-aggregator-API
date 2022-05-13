@@ -14,22 +14,42 @@ namespace RegulatoryDocuments.Services
         public RegulatoryDocumentsService()
         {
             regulatoryDocumentsSources.Add(new GovSPbRu());
-            //var configFileText = File.ReadAllText("./Config/config.json");
-            //var configFileJson = JObject.Parse(configFileText)?["Weather"];
-
-            //configs = configFileJson?.ToObject<WeatherConfigs>();
         }
 
-        public List<string> GetRegulatoryDocumentsAsync()
+        public List<string> GetRegulatoryDocuments()
         {
             List<string> result = new List<string>();
-            /*for (int i = 0; i < 10; i++)
-            {
-                result.Add(i.ToString());
-            }*/
+            
             foreach (var source in regulatoryDocumentsSources)
             {
+                Console.WriteLine(source.parse());
                 result.AddRange(source.parse().Result);
+            }
+
+            return result;
+        }
+
+        public DocResult parse()
+        {
+            DocResult result = new DocResult();
+            var regulatoryDocuments = GetRegulatoryDocuments();
+
+            foreach (var regulatoryDocument in regulatoryDocuments)
+            {
+                var docElement = new DocElementResult();
+                var index = regulatoryDocument.IndexOf("<a href=\"");
+                if (index == -1)
+                {
+                    continue;
+                }
+                //string s = regulatoryDocument
+                string tmp = regulatoryDocument.Substring(index + "<a href=\"".Length);
+                docElement.Url = "https://www.gov.spb.ru" + tmp[..tmp.IndexOf("\">")];
+
+                tmp = tmp.Substring(tmp.IndexOf("\">") + "\">".Length);
+                docElement.Title = tmp[..tmp.IndexOf("</a></p>")].Replace("&nbsp;", " ").Replace("\"", "'");
+
+                result.DocElements.Add(docElement);
             }
 
             return result;
