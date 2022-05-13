@@ -9,7 +9,7 @@ namespace WaterTransportAPI.Controllers
     {
         private readonly ILogger<WeatherController> _logger;
 
-        private WeatherService weatherService = new WeatherService(); 
+        private WeatherService weatherService = new WeatherService();
 
         public WeatherController(ILogger<WeatherController> logger)
         {
